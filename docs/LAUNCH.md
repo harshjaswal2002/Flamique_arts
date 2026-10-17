@@ -10,4 +10,4 @@
 - Enable checkout in both the frontend config and `public.store_settings` only after checks pass.
 - Configure monitoring, backups and a customer-data deletion process appropriate to the chosen plan.
 
-The backend is deployed. Checkout is disabled and the live website still needs the migrated frontend release.
+The Supabase backend and storefront are deployed. COD checkout is enabled following transaction-based database verification. Add the real catalogue; complete owner signup, email delivery and browser/device testing.

@@ -64,3 +64,5 @@ export async function uploadProductImage(file){
   checked(await s.storage.from('product-images').upload(path,file,{contentType:file.type,upsert:false}));
   return s.storage.from('product-images').getPublicUrl(path).data.publicUrl;
 }
+
+export async function getStoreSettings(){const row=checked(await (await connect()).from('store_settings').select('orders_enabled,shipping_fee,free_shipping_threshold').eq('id',true).single());return {ordersEnabled:row.orders_enabled===true,shippingFee:Number(row.shipping_fee),freeShippingThreshold:Number(row.free_shipping_threshold)};}

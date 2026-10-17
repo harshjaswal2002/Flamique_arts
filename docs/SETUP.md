@@ -17,7 +17,7 @@ The public `product-images` bucket accepts JPEG, PNG and WebP up to 5 MiB. Only 
 
 ## Owner account
 
-`jaswalharsh309@gmail.com` is authorized in the private database allowlist. No Supabase Auth account for this email existed during setup. Create the account from the storefront, follow its email confirmation link, then sign in at `/admin/`. The account needs a Supabase password; a former Firebase password is not transferred. Never send passwords through chat.
+`kashity1997@gmail.com` is now authorized in the private database allowlist, as requested. The existing owner authorization is preserved. No Auth account for the requested email existed at verification. Create the account from the storefront, follow its email confirmation link, then sign in at `/admin/`. The account needs a Supabase password; a former Firebase password is not transferred. Never send passwords through chat.
 
 To authorize a different owner, use the trusted SQL editor:
 
@@ -37,13 +37,13 @@ Review email delivery/SMTP in the dashboard before launch. This migration does n
 
 Add collections first, then real products and images in `/admin/`. The empty connected catalogue does not fall back to sample entries.
 
-Delivery is ₹50 below ₹200, free at ₹200 or more, for Chandigarh Tricity and nearby areas. Payment is COD. Confirm exact coverage and purchase policies before opening orders. To enable checkout after testing, set `storeSettings.ordersEnabled=true` in `packages/shared/config.js`, deploy the frontend, and run this trusted SQL:
+Delivery is ₹50 below ₹200, free at ₹200 or more, for Chandigarh Tricity and nearby areas. Payment is COD. Confirm exact coverage and purchase policies before opening orders. COD checkout is enabled after the database integration suite passed. The storefront loads live rates and the order switch from `store_settings` on startup and again at checkout. To resume checkout after pausing, run this trusted SQL:
 
 ```sql
 update public.store_settings set orders_enabled=true where id=true;
 ```
 
-Shipping values in that row govern server totals. Keep frontend `shippingFee`/`freeShippingThreshold` synchronized when changing them. To pause purchases, set the database flag false first.
+Shipping values in that row govern server totals and are loaded by the storefront; configuration values are fallback defaults. To pause purchases, set the database flag false first.
 
 ## Verification
 
