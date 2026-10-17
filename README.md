@@ -1,47 +1,33 @@
 # Flamique Arts
 
-A responsive candle and handmade goods storefront with a separate, access-controlled admin studio and Firebase backend. Public storefront preview: Vercel project `flamique-arts` in `harshjaswal2002s-projects`.
+A candle and handmade goods storefront with a separate admin studio, powered by Supabase Auth, PostgreSQL and Storage. The connected project is `ehxjggmrdlfgynuksiql` (`flamique_arts`).
 
-**Current state:** public preview with sample catalogue and stock photography; checkout submissions disabled. Firebase public web configuration is connected; backend source is provided but not deployed. No online payment provider is connected. Admin preview is read-only with no customer/order fixtures. This is not yet a live transactional store.
+The backend schema, protected order operations and public product-image bucket are deployed. The catalogue starts empty; sample products are available only in the read-only admin preview. Checkout remains disabled until the maker adds real products and completes launch checks. No online payment provider is connected.
 
 ## Run
 
-Requires Node 22+ and Python 3 for the optional static server.
+Use a current supported Node LTS version (22 or newer) and Python 3 for the static server.
 
-```
+```sh
+npm ci
 npm run build
 npm test
 npm run dev
 ```
 
-Storefront: `/`. Admin: `/admin/`. The build is dependency-free and copies source to ignored `public/`. Firebase SDK modules load only when configuration is supplied.
+Storefront: `http://localhost:3000/`. Admin: `http://localhost:3000/admin/`. The build bundles the pinned Supabase client into `public/shared/supabase.js`; no third-party SDK CDN is needed.
 
-## Source ownership
+## Source
 
-| Folder | Responsibility | Branch |
-| --- | --- | --- |
-| `apps/storefront/` | Home, collections, search, product detail, wishlist, bag, profile and checkout | `feature/storefront` |
-| `apps/admin/` | Admin shell, product editor, collections, orders, customer records | `feature/admin-portal` |
-| `packages/shared/` | Catalogue, Firebase client, configuration, money and cart helpers | `feature/shared-commerce` |
-| `backend/` | Callable functions, transactions, rules, storage and admin setup | `feature/firebase-backend` |
-| `docs/`, SEO metadata | Setup, business policies, branch map | `feature/seo-and-content` |
-| `main` | Integrated release deployed to Vercel | `main` |
+- `apps/storefront/`: storefront, accounts, cart and checkout.
+- `apps/admin/`: products, collections, image uploads, orders and customers.
+- `packages/shared/supabase.js`: Auth, database RPC and Storage client.
+- `packages/shared/config.js`: public project URL/key and store presentation settings.
+- `backend/supabase/`: schema, verified admin authorization and rollback-based integration verification.
+- `backend/domain.js`: pure order helpers used by unit tests.
 
-See [setup](docs/SETUP.md), [branch workflow](docs/BRANCHES.md), and [launch checklist](docs/LAUNCH.md).
+Orders use database transactions with server-owned prices, inventory row locks, unique checkout request keys, controlled fulfilment transitions and one-time cancellation stock restoration. Clients cannot directly write orders, payment totals or product stock. RLS protects customer records and unpublished catalogue entries. Admin access is checked in the database against a private owner-managed allowlist and a verified Auth email, or an explicitly assigned user ID.
 
-## Features
+See [setup](docs/SETUP.md) and [launch checklist](docs/LAUNCH.md). Firebase code and runtime configuration have been removed. Previously created Firebase resources were left in place; no customer/product data has been imported from Firebase.
 
-- Responsive editorial storefront in ivory, terracotta and warm neutral colours.
-- Animated collection tiles, product cards, cart drawer, account menus and reduced-motion support.
-- Search, category and price sorting; product details; wishlist and bag persist in this browser.
-- Cart quantity limits and explicit empty states. Sample checkout shows online/offline choices without accepting an order.
-- Firebase email/password account creation, sign in, sign out, password reset, profile name updates, order history and cancellation once configured.
-- Admin product/collection CRUD through editing and visibility controls; photo upload to Storage; stock alerts; order tracking, offline payment status, customer lookup and CSV export.
-- Server-authoritative order pricing, atomic stock reservation, retry idempotency, forward-only fulfilment transitions and one-time stock restoration on eligible cancellations.
-- Firebase admin custom-claim protection. No client-writable orders, stock or payment totals. App Check enabled by default in callable functions.
-
-## Important limitations
-
-Firebase Auth and project services must be enabled; App Check and backend deployment remain required before admin/order callables run. Full Firebase emulator/integration and browser/device tests remain required before accepting real orders. Six unit tests cover domain calculations and transition boundaries, not deployed security rules. Payment capture, courier API integration, transactional notifications, refunds, coupons, review moderation and customer data deletion workflows are not implemented. The avatar displays an existing profile photo if provided by Auth, otherwise an initial; custom profile photo upload and Google login are not enabled. Product image URLs are configurable, and admins can upload images after Storage setup. Customer addresses are kept on orders, not in a separate address book.
-
-Sample photography: Unsplash. Replace all sample entries and photos with the maker's real catalogue before opening sales. Do not imply sample fragrance, material, weight or price is final. There are no invented reviews or sales counts.
+The frontend changes are local until deployed through the existing website hosting workflow. Backend migrations do not publish the frontend.

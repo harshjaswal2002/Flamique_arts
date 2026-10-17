@@ -14,7 +14,7 @@
 | Navbar, animations, mobile layout, cart, profile | `feature/storefront`, `apps/storefront/` |
 | Product editor, order screens, admin mobile layout | `feature/admin-portal`, `apps/admin/` |
 | Inventory, order calculations, permissions | `feature/firebase-backend`, `backend/` |
-| Shared config, currencies, Firebase client | `feature/shared-commerce`, `packages/shared/` |
+| Shared config, currencies, Supabase client | `feature/shared-commerce`, `packages/shared/` |
 | Metadata, descriptions, policies, setup | `feature/seo-and-content`, `docs/` and storefront HTML |
 
-Never deploy just the backend branch as the website root. Firebase deploys separately from `backend/`; Vercel serves the integrated frontend build from the repository root. Do not store passwords or service-account JSON in any branch.
+Never deploy just the backend branch as the website root. Supabase database migrations deploy separately from `backend/supabase/`; Vercel serves the integrated frontend build from the repository root. Do not store passwords or service-account JSON in any branch.

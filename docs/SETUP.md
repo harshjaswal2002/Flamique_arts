@@ -1,69 +1,56 @@
-# Current configuration
+# Supabase setup
 
-Firebase public web config is supplied for `flamiquearts`. Business contact is flamiquearts@gmail.com; WhatsApp +91 78378 89616; Instagram @flamique_arts. Delivery is Chandigarh Tricity and nearby areas, ₹50 below ₹200 and free at ₹200 or more. Payment is cash on delivery. Damaged items are eligible for return, refund or replacement after review. Exact nearby PIN-code coverage, dispatch times and damage-reporting procedure remain to be confirmed.
+Connected project: `ehxjggmrdlfgynuksiql`, region `ap-southeast-2`. The project URL and publishable key in `packages/shared/config.js` are public client configuration. Never place secret/service-role keys in frontend files.
 
-The merchant will manage products and categories. The connected storefront loads Firestore catalogue entries and does not fall back to sample products when Firestore is empty/unavailable. Firebase admin access and backend deployment still require authenticated project access. Public configuration alone cannot grant privileges. Orders remain disabled.
+## Backend
 
-Use the existing owner's Firebase Auth account and `node backend/functions/set-admin-by-email.mjs <owner-email>` in a trusted environment with Application Default Credentials to assign the admin claim. Do not put admin email/password allowlists in the frontend. The account must already exist.
+The hosted project has these applied migrations:
 
-# Firebase and Vercel setup
+1. `supabase_commerce_backend`, corresponding to `backend/supabase/schema.sql`.
+2. `verified_email_admin_access`, corresponding to `backend/supabase/admin-access.sql`.
 
-## Information needed from the owner
+For a new project, apply those scripts in order with the Supabase migration API or trusted SQL editor, then configure its public URL/key. The `private` schema must remain excluded from exposed Data API schemas. Public RPC wrappers call private, identity-checked functions. Security-definer functions use an empty search path and explicitly qualified relations. `private.admin_users` and `private.admin_emails` are intentionally inaccessible to clients.
 
-- Firebase public web app configuration object from **Project settings → General → Your apps → Web** for `flamiquearts` (apiKey, authDomain, projectId, storageBucket, messagingSenderId, appId).
-- The account email that should administer the store. Create that account, then use its Firebase Auth UID for claim assignment.
-- Firebase App Check reCAPTCHA v3 public site key. Configure allowed production and local domains.
-- Real logo, product photos, titles, descriptions, category, price, stock, weights/dimensions, ingredients/materials, fragrance and care instructions.
-- Business contact email, WhatsApp/Instagram links, service regions, dispatch and delivery times, shipping charges, free shipping threshold, returns/cancellation policy and legal business identity.
-- Meaning of offline payment: COD, bank transfer or another arrangement. The implementation currently labels it generically and records orders unpaid; only an admin can confirm receipt.
+Tables: `categories`, `products`, `users`, `orders`, `store_settings`. The `users` table is synchronized by an Auth trigger. All application tables have RLS. Public visitors see active catalogue records and shipping settings; account holders see their own profile and orders. Only studio administrators manage collections, products and orders. No product/order delete operation is exposed.
 
-Do not send Firebase service-account keys or Vercel access tokens through chat.
+The public `product-images` bucket accepts JPEG, PNG and WebP up to 5 MiB. Only admins can upload, replace or remove files. Uploaded images are public product assets; never upload customer information there.
 
-## Connect Firebase
+## Owner account
 
-1. Create a Web app inside the existing `flamiquearts` project. Paste its **public** config into `packages/shared/config.js` as `firebaseConfig`. Supply `appCheckSiteKey` there as well.
-2. Enable Authentication → Email/password. Add the production Vercel domain and your eventual custom domain as authorised domains.
-3. Create Firestore and Storage in the desired region. Functions use `asia-south1`. Confirm billing requirements and quotas before enabling services.
-4. Register the Web app in Firebase App Check with reCAPTCHA v3. Functions enforce App Check by default. Use Firebase's documented debug token flow locally; do not disable enforcement in production.
-5. In a trusted local terminal with Firebase CLI and Node 22 installed:
+`jaswalharsh309@gmail.com` is authorized in the private database allowlist. No Supabase Auth account for this email existed during setup. Create the account from the storefront, follow its email confirmation link, then sign in at `/admin/`. The account needs a Supabase password; a former Firebase password is not transferred. Never send passwords through chat.
 
-```
-cd backend/functions
-npm install
-cd ..
-firebase login
-firebase use flamiquearts
-firebase emulators:start
+To authorize a different owner, use the trusted SQL editor:
+
+```sql
+insert into private.admin_emails(email) values ('verified-owner@example.com') on conflict do nothing;
 ```
 
-Deploy when rules and function tests pass:
+The database checks the actual Auth user's verified email, not browser-provided user metadata or email claims. Remove the row to revoke access. Explicit user-ID grants can also be stored in `private.admin_users`; revoke both paths if both were assigned.
 
+## Authentication URLs and email delivery
+
+In Supabase Authentication → URL Configuration, set the Site URL to the actual production storefront URL and allow the production origin plus `http://localhost:3000/` for development. Signup confirmation and password recovery need allowed redirect URLs. Keep email confirmation enabled. The frontend supports confirmation-required signup, recovery email, and a new-password form when a recovery link is opened.
+
+Review email delivery/SMTP in the dashboard before launch. This migration does not change dashboard authentication delivery settings or create a password for the owner.
+
+## Catalogue and checkout
+
+Add collections first, then real products and images in `/admin/`. The empty connected catalogue does not fall back to sample entries.
+
+Delivery is ₹50 below ₹200, free at ₹200 or more, for Chandigarh Tricity and nearby areas. Payment is COD. Confirm exact coverage and purchase policies before opening orders. To enable checkout after testing, set `storeSettings.ordersEnabled=true` in `packages/shared/config.js`, deploy the frontend, and run this trusted SQL:
+
+```sql
+update public.store_settings set orders_enabled=true where id=true;
 ```
-firebase deploy --only firestore:rules,firestore:indexes,storage,functions
-```
 
-6. Callable function parameters default to `ORDERS_ENABLED=false`, `ENFORCE_APP_CHECK=true`, `SHIPPING_FEE_INR=50`, `FREE_SHIPPING_THRESHOLD_INR=200`. Review these with the business; these delivery amounts match the supplied business policy. Firebase prompts for parameters during deployment. Configure matching storefront values. Keep both order flags false until launch readiness is verified.
-7. Create the owner's account in Firebase Auth. In a trusted environment authenticated with Application Default Credentials scoped to this Firebase project, run `node backend/functions/set-admin.mjs <verified-auth-uid>`. The owner signs out and in again. The script preserves existing custom claims. Never add a client-side admin password or email allowlist as security.
-8. Sign into `/admin/` and add categories first, then actual products. A product editor also offers inline category creation, retaining the draft fields (reselect an unsaved upload if needed). Admin can upload JPEG, PNG or WebP below 5 MB to Storage.
+Shipping values in that row govern server totals. Keep frontend `shippingFee`/`freeShippingThreshold` synchronized when changing them. To pause purchases, set the database flag false first.
 
-All product and category documents are public catalogue data, including unpublished entries. Do not put supplier prices, personal information or confidential notes there. Orders and users are access-controlled.
+## Verification
 
-## Deploy Vercel
+`npm test` covers pure calculations and state transitions. Run `backend/supabase/verify.sql` with a trusted SQL connection or the Supabase SQL tool for actual RLS and database-function checks. It creates synthetic users/products/orders inside a transaction, tests ordinary/admin/anonymous access, prices, duplicate retries, stock limits and cancellation restoration, then rolls every change back. Do not split this script into separate requests.
 
-Project: `flamique-arts`, team: `harshjaswal2002s-projects`, Git repository: `harshjaswal2002/Flamique_arts`, production branch: `main`. Build command `npm run build`; output directory `public`; root repository directory. Vercel is public by request. Firebase configuration is currently source-level public Web config; no secret belongs there. Frontend deployment does not deploy Firebase rules/functions.
+The integration checks do not prove mail delivery or true simultaneous multi-connection checkout. Verify those plus browser sign-in, profile editing, password recovery, photo upload and order handling with test accounts before launch.
 
-## Verification before orders open
+## Website hosting
 
-Use Firebase emulators and a staging Firebase project to check:
-
-- Anonymous and ordinary user attempts cannot read other customers or change products, stock or orders.
-- Valid admin claims permit category writes and product/order callables; revoked claims stop working after refresh.
-- App Check rejects missing/invalid tokens and accepts the production app.
-- Two simultaneous purchases of the last unit yield one order, with no oversell.
-- Retrying a checkout with the same request ID does not duplicate orders or deduct stock twice.
-- Cancellation restores stock once; shipped/delivered/paid orders cannot be cancelled through the normal flow.
-- Online payment is unavailable and no browser-supplied price is trusted.
-- Real accounts can see only their own order history, reset a password, update their name and sign out.
-- Mobile and desktop browser checks cover keyboard focus, dropdowns, bag quantity limits, empty states, delivery form, errors and image loading.
-
-Automated unit tests do not replace these integration checks.
+The existing Vercel configuration still builds with `npm run build` and serves `public/`. Backend deployment is independent of frontend publishing. Publish the local migration through your normal Git/hosting workflow; no Vercel deployment or Git push is performed by the migration itself.

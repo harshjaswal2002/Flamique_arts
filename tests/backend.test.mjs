@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {validItems,calculateOrder,allowedTransition} from '../backend/functions/domain.js';
+import {validItems,calculateOrder,allowedTransition} from '../backend/domain.js';
 import {totals,escapeHtml,validateProduct} from '../packages/shared/commerce.js';
 test('server calculates prices from trusted catalogue and uses integer minor units',()=>{const r=calculateOrder([{productId:'a',quantity:3}],{a:{title:'A',price:10.1,quantity:3}},79,1499);assert.equal(r.subtotal,30.3);assert.equal(r.total,109.3)});
 test('rejects oversold or hidden inventory',()=>{assert.throws(()=>calculateOrder([{productId:'a',quantity:2}],{a:{price:10,quantity:1}},79,1499));assert.throws(()=>calculateOrder([{productId:'a',quantity:1}],{a:{price:10,quantity:1,active:false}},79,1499));});
