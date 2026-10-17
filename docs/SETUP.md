@@ -1,3 +1,11 @@
+# Current configuration
+
+Firebase public web config is supplied for `flamiquearts`. Business contact is flamiquearts@gmail.com; WhatsApp +91 78378 89616; Instagram @flamique_arts. Delivery is Chandigarh Tricity and nearby areas, ₹50 below ₹200 and free at ₹200 or more. Payment is cash on delivery. Damaged items are eligible for return, refund or replacement after review. Exact nearby PIN-code coverage, dispatch times and damage-reporting procedure remain to be confirmed.
+
+The merchant will manage products and categories. The connected storefront loads Firestore catalogue entries and does not fall back to sample products when Firestore is empty/unavailable. Firebase admin access and backend deployment still require authenticated project access. Public configuration alone cannot grant privileges. Orders remain disabled.
+
+Use the existing owner's Firebase Auth account and `node backend/functions/set-admin-by-email.mjs <owner-email>` in a trusted environment with Application Default Credentials to assign the admin claim. Do not put admin email/password allowlists in the frontend. The account must already exist.
+
 # Firebase and Vercel setup
 
 ## Information needed from the owner
@@ -34,7 +42,7 @@ Deploy when rules and function tests pass:
 firebase deploy --only firestore:rules,firestore:indexes,storage,functions
 ```
 
-6. Callable function parameters default to `ORDERS_ENABLED=false`, `ENFORCE_APP_CHECK=true`, `SHIPPING_FEE_INR=79`, `FREE_SHIPPING_THRESHOLD_INR=1499`. Review these with the business; the latter two are sample amounts. Firebase prompts for parameters during deployment. Configure matching storefront values. Keep both order flags false until launch readiness is verified.
+6. Callable function parameters default to `ORDERS_ENABLED=false`, `ENFORCE_APP_CHECK=true`, `SHIPPING_FEE_INR=50`, `FREE_SHIPPING_THRESHOLD_INR=200`. Review these with the business; these delivery amounts match the supplied business policy. Firebase prompts for parameters during deployment. Configure matching storefront values. Keep both order flags false until launch readiness is verified.
 7. Create the owner's account in Firebase Auth. In a trusted environment authenticated with Application Default Credentials scoped to this Firebase project, run `node backend/functions/set-admin.mjs <verified-auth-uid>`. The owner signs out and in again. The script preserves existing custom claims. Never add a client-side admin password or email allowlist as security.
 8. Sign into `/admin/` and add categories first, then actual products. A product editor also offers inline category creation, retaining the draft fields (reselect an unsaved upload if needed). Admin can upload JPEG, PNG or WebP below 5 MB to Storage.
 

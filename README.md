@@ -2,7 +2,7 @@
 
 A responsive candle and handmade goods storefront with a separate, access-controlled admin studio and Firebase backend. Public storefront preview: Vercel project `flamique-arts` in `harshjaswal2002s-projects`.
 
-**Current state:** public preview with sample catalogue and stock photography; checkout submissions disabled. Firebase source is provided but not deployed/configured. No online payment provider is connected. Admin preview is read-only with no customer/order fixtures. This is not yet a live transactional store.
+**Current state:** public preview with sample catalogue and stock photography; checkout submissions disabled. Firebase public web configuration is connected; backend source is provided but not deployed. No online payment provider is connected. Admin preview is read-only with no customer/order fixtures. This is not yet a live transactional store.
 
 ## Run
 
@@ -42,6 +42,6 @@ See [setup](docs/SETUP.md), [branch workflow](docs/BRANCHES.md), and [launch che
 
 ## Important limitations
 
-Firebase and App Check must be configured before backend flows run. Full Firebase emulator/integration and browser/device tests remain required before accepting real orders. Six unit tests cover domain calculations and transition boundaries, not deployed security rules. Payment capture, courier API integration, transactional notifications, refunds, coupons, review moderation and customer data deletion workflows are not implemented. The avatar displays an existing profile photo if provided by Auth, otherwise an initial; custom profile photo upload and Google login are not enabled. Product image URLs are configurable, and admins can upload images after Storage setup. Customer addresses are kept on orders, not in a separate address book.
+Firebase Auth and project services must be enabled; App Check and backend deployment remain required before admin/order callables run. Full Firebase emulator/integration and browser/device tests remain required before accepting real orders. Six unit tests cover domain calculations and transition boundaries, not deployed security rules. Payment capture, courier API integration, transactional notifications, refunds, coupons, review moderation and customer data deletion workflows are not implemented. The avatar displays an existing profile photo if provided by Auth, otherwise an initial; custom profile photo upload and Google login are not enabled. Product image URLs are configurable, and admins can upload images after Storage setup. Customer addresses are kept on orders, not in a separate address book.
 
 Sample photography: Unsplash. Replace all sample entries and photos with the maker's real catalogue before opening sales. Do not imply sample fragrance, material, weight or price is final. There are no invented reviews or sales counts.

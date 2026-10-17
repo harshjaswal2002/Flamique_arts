@@ -1,8 +1,8 @@
 # Before the first real order
 
 - Replace sample catalogue data and stock images with actual products; confirm accurate specifications and safety instructions.
-- Publish real business contact details, delivery regions, shipping rates, lead times, cancellations, returns, refunds, terms and privacy information.
-- Choose offline payment policy. Online payments require a separate provider integration with server verification and webhook reconciliation; never trust a browser success redirect.
+- Contact details, Tricity delivery, ₹50 shipping below ₹200 and damaged-item returns/refunds/replacements are published. Finalise exact nearby coverage, lead times, cancellation terms and the damage-reporting process.
+- Cash on delivery is selected. Confirm collection and remittance procedures. Online payments require a separate provider integration with server verification and webhook reconciliation; never trust a browser success redirect.
 - Configure Firebase, authentication domains, App Check, admin claims, Firestore rules and Storage rules; deploy functions.
 - Complete emulator security and concurrency checks plus browser/device testing.
 - Update the preview announcement, sample notes, FAQ answers, policies, shipping labels and footer in `apps/storefront/` once the store is genuinely ready. These deliberately describe the current preview.
